@@ -90,10 +90,12 @@ static BOOL RCTParseSelectorPart(const char **input, NSMutableString *selector)
   return NO;
 }
 
+// https://github.com/facebook/react-native/pull/25146
 static BOOL RCTParseUnused(const char **input)
 {
   return RCTReadString(input, "__unused") ||
-         RCTReadString(input, "__attribute__((unused))");
+         RCTReadString(input, "__attribute__((unused))") ||
+         RCTReadString(input, "__attribute__((__unused__))");
 }
 
 static RCTNullability RCTParseNullability(const char **input)
