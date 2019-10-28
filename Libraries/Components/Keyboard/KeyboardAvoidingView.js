@@ -117,11 +117,12 @@ const KeyboardAvoidingView = createReactClass({
       return;
     }
 
+    //* https://github.com/facebook/react-native/commit/87b65339379362f9db77ae3f5c9fa8934da34b25
     if (duration && easing) {
       LayoutAnimation.configureNext({
-        duration: duration,
+        duration: duration > 10 ? duration : 10,
         update: {
-          duration: duration,
+          duration: duration > 10 ? duration : 10,
           type: LayoutAnimation.Types[easing] || 'keyboard',
         },
       });
