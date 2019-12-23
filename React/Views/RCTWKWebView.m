@@ -9,6 +9,36 @@
 #import <React/RCTConvert.h>
 #import "RCTAutoInsetsProtocol.h"
 
+@interface RCTWeakProxy_RCTWKWebView : NSObject<WKScriptMessageHandler>
+@property (nonatomic, weak, readonly) id target;
++ (instancetype)weakProxyWithTarget:(id)target;
+@end
+
+@implementation RCTWeakProxy_RCTWKWebView
+- (instancetype)initWithTarget:(id)target
+{
+    if (self = [super init]) {
+        _target = target;
+    }
+    return self;
+}
+
++ (instancetype)weakProxyWithTarget:(id)target
+{
+    return [[RCTWeakProxy_RCTWKWebView alloc] initWithTarget:target];
+}
+
+- (id)forwardingTargetForSelector:(SEL)aSelector
+{
+    return _target;
+}
+
+@end
+
+
+#pragma mark ------------------------------------
+
+
 static NSString *const MessageHanderName = @"ReactNative";
 
 @interface RCTWKWebView () <WKUIDelegate, WKNavigationDelegate, WKScriptMessageHandler, UIScrollViewDelegate, RCTAutoInsetsProtocol>
@@ -27,7 +57,7 @@ static NSString *const MessageHanderName = @"ReactNative";
 
 - (void)dealloc
 {
-
+    NSLog(@"dealloc called");
 }
 
 /**
@@ -70,7 +100,9 @@ static NSString *const MessageHanderName = @"ReactNative";
 
     WKWebViewConfiguration *wkWebViewConfig = [WKWebViewConfiguration new];
     wkWebViewConfig.userContentController = [WKUserContentController new];
-    [wkWebViewConfig.userContentController addScriptMessageHandler: self name: MessageHanderName];
+
+      RCTWeakProxy_RCTWKWebView *weakProxy = [RCTWeakProxy_RCTWKWebView weakProxyWithTarget:self];//非常重要！fix retain cycle
+    [wkWebViewConfig.userContentController addScriptMessageHandler:weakProxy name: MessageHanderName];
     wkWebViewConfig.allowsInlineMediaPlayback = _allowsInlineMediaPlayback;
 #if WEBKIT_IOS_10_APIS_AVAILABLE
     wkWebViewConfig.mediaTypesRequiringUserActionForPlayback = _mediaPlaybackRequiresUserAction

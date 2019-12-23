@@ -139,21 +139,24 @@ RCT_EXPORT_METHOD(stopLoading:(nonnull NSNumber *)reactTag)
 shouldStartLoadForRequest:(NSMutableDictionary<NSString *, id> *)request
              withCallback:(RCTDirectEventBlock)callback
 {
-  _shouldStartLoadLock = [[NSConditionLock alloc] initWithCondition:arc4random()];
-  _shouldStartLoad = YES;
-  request[@"lockIdentifier"] = @(_shouldStartLoadLock.condition);
-  callback(request);
+    return YES; //全都加载，防止卡顿
 
-  // Block the main thread for a maximum of 250ms until the JS thread returns
-  if ([_shouldStartLoadLock lockWhenCondition:0 beforeDate:[NSDate dateWithTimeIntervalSinceNow:.25]]) {
-    BOOL returnValue = _shouldStartLoad;
-    [_shouldStartLoadLock unlock];
-    _shouldStartLoadLock = nil;
-    return returnValue;
-  } else {
-    RCTLogWarn(@"Did not receive response to shouldStartLoad in time, defaulting to YES");
-    return YES;
-  }
+//  _shouldStartLoadLock = [[NSConditionLock alloc] initWithCondition:arc4random()];
+//  _shouldStartLoad = YES;
+//  request[@"lockIdentifier"] = @(_shouldStartLoadLock.condition);
+//  callback(request);
+//
+//  // Block the main thread for a maximum of 250ms until the JS thread returns
+//  if ([_shouldStartLoadLock lockWhenCondition:0 beforeDate:[NSDate dateWithTimeIntervalSinceNow:.25]]) {
+//    BOOL returnValue = _shouldStartLoad;
+//    [_shouldStartLoadLock unlock];
+//    _shouldStartLoadLock = nil;
+//      RCTLogWarn(@"shouldStartLoadForRequest 获得了returnValue=%d",returnValue);
+//    return returnValue;
+//  } else {
+//    RCTLogWarn(@"shouldStartLoadForRequest Did not receive response to shouldStartLoad in time, defaulting to YES",request);
+//    return YES;
+//  }
 }
 
 RCT_EXPORT_METHOD(startLoadWithResult:(BOOL)result lockIdentifier:(NSInteger)lockIdentifier)
